@@ -429,9 +429,7 @@ export default function App() {
         )}
 
         {isSignInOpen && (
-          <SignInModal 
-            onClose={() => setIsSignInOpen(false)} 
-          />
+          <SignInModal onClose={() => {}} />
         )}
       </AnimatePresence>
 

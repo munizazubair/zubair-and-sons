@@ -1,3 +1,4 @@
+// middleware.ts
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
@@ -27,11 +28,30 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser();
 
-  // protect your dashboard routes — adjust path as needed
-  if (!user && request.nextUrl.pathname.startsWith('/dashboard')) {
+  const path = request.nextUrl.pathname;
+  const isProtectedMain = path.startsWith('/main');
+  const isProtectedDashboard = path.startsWith('/dashboard');
+
+  // not logged in -> block both /main and /dashboard
+  if (!user && (isProtectedMain || isProtectedDashboard)) {
     const url = request.nextUrl.clone();
-    url.pathname = '/';
+    url.pathname = '/login';
     return NextResponse.redirect(url);
+  }
+
+  // dashboard needs an extra role check
+  if (user && isProtectedDashboard) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+
+    if (profile?.role !== 'admin') {
+      const url = request.nextUrl.clone();
+      url.pathname = '/main';
+      return NextResponse.redirect(url);
+    }
   }
 
   return response;
