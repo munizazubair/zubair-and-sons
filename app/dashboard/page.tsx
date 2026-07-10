@@ -1,9 +1,10 @@
-import App2 from "@/app/page2";
+import App2 from "../page2";
 
-export default function Apps() {
-return (
-<div>
-    <App2 /> 
-</div>
-)
+export default function App() {
+
+  return (
+    <div>
+      <App2 />
+    </div>
+  )
 }
