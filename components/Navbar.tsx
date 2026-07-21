@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
 import { Diamond, ShoppingBag, Menu, X, ArrowRight, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Product } from '@/data/products';
@@ -9,6 +10,7 @@ interface NavbarProps {
   cart: { product: Product; quantity: number; selectedColor: string }[];
   removeFromCart: (index: number) => void;
   onOpenSignIn: () => void;
+  onOpenSignUp: () => void;
 }
 
 export default function Navbar({
@@ -17,9 +19,34 @@ export default function Navbar({
   cart,
   removeFromCart,
   onOpenSignIn,
+  onOpenSignUp,
 }: NavbarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
+
+const supabase = createClient();
+
+const [user, setUser] = useState<any>(null);
+
+useEffect(() => {
+  const getUser = async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    setUser(user);
+  };
+
+  getUser();
+
+  const {
+    data: { subscription },
+  } = supabase.auth.onAuthStateChange((_event, session) => {
+    setUser(session?.user ?? null);
+  });
+
+  return () => subscription.unsubscribe();
+}, []);
 
   const navItems = [
     { label: 'Products', id: 'products' },
@@ -101,13 +128,32 @@ export default function Navbar({
             </button>
 
             {/* Sign In Button */}
-            <button
-              onClick={onOpenSignIn}
-              className="px-6 py-2 rounded-full border border-white/20 hover:border-white text-white text-sm font-medium hover:bg-white/5 transition-all cursor-pointer flex items-center gap-2"
-            >
-              <User className="w-4 h-4" />
-              Sign in
-            </button>
+            {user ? (
+  <button className="w-11 h-11 rounded-full bg-orange-500 flex items-center justify-center overflow-hidden">
+    <button className="w-11 h-11 rounded-full bg-orange-500 flex items-center justify-center text-white font-semibold text-lg">
+  {user?.user_metadata?.full_name?.charAt(0).toUpperCase() ??
+    user?.email?.charAt(0).toUpperCase()}
+</button>
+  </button>
+) : (
+  <>
+    <button
+      onClick={onOpenSignIn}
+      className="px-6 py-2 rounded-full border border-white/20 hover:border-white text-white text-sm font-medium hover:bg-white/5 transition-all cursor-pointer flex items-center gap-2"
+    >
+      <User className="w-4 h-4" />
+      Sign In
+    </button>
+
+    <button
+      onClick={onOpenSignUp}
+      className="px-6 py-2 rounded-full bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium transition-all cursor-pointer"
+    >
+      <User className="w-4 h-4" />
+      Sign Up
+    </button>
+  </>
+)}
           </div>
 
           {/* Mobile Menu Button */}
@@ -155,18 +201,40 @@ export default function Navbar({
                 </button>
               ))}
             </div>
-            <div className="pt-4">
-              <button
-                onClick={() => {
-                  setIsOpen(false);
-                  onOpenSignIn();
-                }}
-                className="w-full text-center py-3 bg-gradient-to-r from-orange-500 to-amber-600 rounded-full text-white font-medium hover:scale-105 transition-all flex items-center justify-center gap-2"
-              >
-                <User className="w-4 h-4" />
-                Sign in to Account
-              </button>
-            </div>
+<div className="pt-4">
+  {user ? (
+    <div className="flex justify-center">
+      <button className="w-11 h-11 rounded-full bg-orange-500 flex items-center justify-center">
+        <button className="w-11 h-11 rounded-full bg-orange-500 flex items-center justify-center text-white font-semibold text-lg">
+  {user?.user_metadata?.full_name?.charAt(0).toUpperCase() ??
+    user?.email?.charAt(0).toUpperCase()}
+</button>
+      </button>
+    </div>
+  ) : (
+    <div className="flex flex-col gap-3">
+      <button
+        onClick={() => {
+          setIsOpen(false);
+          onOpenSignIn();
+        }}
+        className="w-full py-3 rounded-full border border-white/20 text-white"
+      >
+        Sign In
+      </button>
+
+      <button
+        onClick={() => {
+          setIsOpen(false);
+          onOpenSignUp();
+        }}
+        className="w-full py-3 rounded-full bg-orange-500 text-white"
+      >
+        Sign Up
+      </button>
+    </div>
+  )}
+</div>
           </motion.div>
         )}
       </AnimatePresence>
