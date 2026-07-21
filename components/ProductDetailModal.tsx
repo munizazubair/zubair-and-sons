@@ -1,3 +1,4 @@
+"use client";
 import { useState } from 'react';
 import { motion } from 'motion/react';
 import { X, Check, Star, ShoppingBag, Plus, Minus, Info } from 'lucide-react';

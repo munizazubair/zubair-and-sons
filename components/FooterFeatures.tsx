@@ -1,3 +1,4 @@
+"use client";
 import { ShoppingBag, Sliders, Headset } from 'lucide-react';
 import { motion } from 'motion/react';
 
