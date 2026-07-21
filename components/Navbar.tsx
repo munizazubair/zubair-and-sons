@@ -1,3 +1,4 @@
+"use client";
 import { useState } from 'react';
 import { Diamond, ShoppingBag, Menu, X, ArrowRight, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';

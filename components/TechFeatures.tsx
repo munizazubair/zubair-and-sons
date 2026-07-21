@@ -1,3 +1,4 @@
+"use client";
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Cpu, Zap, Leaf, Shield, Sparkles, Volume2, Maximize2, Layers } from 'lucide-react';
